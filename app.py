@@ -96,7 +96,7 @@ trim_end = st.number_input("Akhiri pada detik", min_value=trim_start + 0.1, max_
 # Opsi looping
 st.subheader("🔁 Pengaturan Looping")
 loop_count = st.number_input("Jumlah loop", min_value=1, max_value=10, value=3)
-fade_duration = st.slider("Durasi transisi halus (detik)", 0.1, 5.0, 1.0, 0.1)
+fade_duration = st.slider("Durasi transisi halus (detik)", 0.01, 0.5, 0.1, 0.01)
 reverse_loop = st.checkbox("Gunakan efek bolak-balik (ping-pong)?", value=True)
 
 # Tombol proses
