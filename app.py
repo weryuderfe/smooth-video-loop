@@ -3,44 +3,53 @@ from moviepy.editor import VideoFileClip, concatenate_videoclips
 import tempfile
 import os
 
-st.set_page_config(page_title="Smooth Video Looper", layout="centered")
-st.title("🔁 Smooth Video Looper")
-st.write("Unggah video berdurasi **minimal 4 detik**, dan kami akan membuat versi looping yang halus dengan crossfade.")
+# Konfigurasi halaman
+st.set_page_config(page_title="Pengulang Video Halus", layout="centered")
+st.title("🔁 Pengulang Video Halus")
+st.write("Unggah video berdurasi **minimal 4 detik**, dan aplikasi ini akan membuat video berulang (looping) dengan transisi yang halus menggunakan efek crossfade.")
 
 # Upload video
-uploaded_file = st.file_uploader("🎞️ Unggah file MP4 (minimal 4 detik):", type=["mp4"])
+uploaded_file = st.file_uploader("🎞️ Unggah video MP4 (durasi minimal 4 detik):", type=["mp4"])
 
-# Atur crossfade dan loop count
-crossfade_duration = st.slider("🎚️ Durasi crossfade (detik)", 0.1, 2.0, 1.0, 0.1)
-loop_count = st.slider("🔁 Jumlah loop", 1, 10, 3)
+# Atur jumlah pengulangan
+loop_count = st.slider("🔁 Jumlah pengulangan", min_value=1, max_value=10, value=3)
 
 if uploaded_file:
-    # Simpan file sementara
+    # Simpan video ke file sementara
     with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as tmp_file:
         tmp_file.write(uploaded_file.read())
         video_path = tmp_file.name
 
-    # Ambil durasi video
+    # Ambil informasi durasi
     clip = VideoFileClip(video_path)
     duration = clip.duration
 
-    # Preview video asli
-    st.subheader("📽️ Preview Video Asli")
+    # Tampilkan pratinjau video asli
+    st.subheader("📽️ Pratinjau Video Asli")
     st.video(video_path)
-    st.info(f"⏱️ Durasi video: **{duration:.2f} detik**")
+    st.info(f"⏱️ Durasi video asli: **{duration:.2f} detik**")
 
     if duration < 4.0:
-        st.error("❌ Durasi video kurang dari 4 detik! Minimal durasi yang diperlukan adalah 4 detik.")
+        st.error("❌ Durasi video kurang dari 4 detik. Silakan unggah video yang lebih panjang.")
     else:
-        if st.button("🔄 Proses dan Buat Loop"):
-            with st.spinner("🚀 Membuat video looping..."):
-                with tempfile.TemporaryDirectory() as tmpdir:
-                    output_path = os.path.join(tmpdir, "looped.mp4")
+        # Durasi crossfade otomatis disesuaikan dengan durasi video yang diunggah
+        crossfade_duration = st.slider(
+            "🎚️ Atur durasi transisi crossfade (dalam detik)",
+            min_value=0.1,
+            max_value=duration - 0.1,  # Durasi crossfade tidak boleh lebih panjang dari durasi video
+            value=duration - 0.1,  # Set awal crossfade menjadi hampir maksimal
+            step=0.1
+        )
 
-                    # Potong 4 detik pertama
+        if st.button("🔄 Proses dan Buat Video Looping"):
+            with st.spinner("Sedang memproses video..."):
+                with tempfile.TemporaryDirectory() as tmpdir:
+                    output_path = os.path.join(tmpdir, "video_loop.mp4")
+
+                    # Potong 4 detik pertama sebagai dasar pengulangan
                     base_clip = clip.subclip(0, 4)
 
-                    # Looping dengan crossfade
+                    # Buat daftar klip untuk digabung
                     loop_clips = []
                     for i in range(loop_count):
                         if i == 0:
@@ -48,24 +57,23 @@ if uploaded_file:
                         else:
                             loop_clips.append(base_clip.crossfadein(crossfade_duration))
 
-                    # Gabungkan dengan crossfade
+                    # Gabungkan dengan transisi
                     final_clip = concatenate_videoclips(
                         loop_clips,
                         method="compose",
                         padding=-crossfade_duration
                     )
 
-                    # Simpan hasil video looping
+                    # Simpan video hasil akhir
                     final_clip.write_videofile(output_path, codec="libx264", audio_codec="aac", verbose=False, logger=None)
 
                     final_duration = final_clip.duration
 
-                    # Tampilkan hasil looping
-                    st.success("✅ Video looping berhasil dibuat!")
-                    st.subheader("📼 Preview Video Looping")
+                    # Tampilkan hasil
+                    st.success("✅ Video berhasil dibuat!")
+                    st.subheader("📼 Pratinjau Video Hasil Looping")
                     st.video(output_path)
-                    st.info(f"🎬 Durasi akhir hasil looping: **{final_duration:.2f} detik**")
+                    st.info(f"🎬 Durasi video hasil: **{final_duration:.2f} detik**")
 
-                    # Tombol unduh
                     with open(output_path, "rb") as f:
-                        st.download_button("⬇️ Unduh Video Loop", f, file_name="smooth_loop.mp4", mime="video/mp4")
+                        st.download_button("⬇️ Unduh Video", f, file_name="video_loop.mp4", mime="video/mp4")
