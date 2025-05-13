@@ -1,5 +1,7 @@
 streamlit
 moviepy
+imageio
 imageio[ffmpeg]
 gdown
+ffmpeg
 ffmpeg[python]
