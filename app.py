@@ -68,12 +68,12 @@ if uploaded_file:
                     final_clip.write_videofile(output_path, codec="libx264", audio_codec="aac", verbose=False, logger=None)
 
                     final_duration = final_clip.duration
-
-                    # Tampilkan hasil
+                    # Menampilkan durasi video hasil
                     st.success("✅ Video berhasil dibuat!")
                     st.subheader("📼 Pratinjau Video Hasil Looping")
                     st.video(output_path)
                     st.info(f"🎬 Durasi video hasil: **{final_duration:.2f} detik**")
 
+                    # Menyediakan tombol unduh video
                     with open(output_path, "rb") as f:
                         st.download_button("⬇️ Unduh Video", f, file_name="video_loop.mp4", mime="video/mp4")
