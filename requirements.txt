@@ -5,3 +5,8 @@ imageio[ffmpeg]
 gdown
 ffmpeg
 ffmpeg[python]
+streamlit
+moviepy==1.0.3
+imageio==2.26.1
+imageio[ffmpeg]==2.26.1
+gdown
